@@ -217,19 +217,19 @@ namespace PassKitSharp
             }
 
             if (json["eventTicket"] != null)
-                p.Pass.Set = ParsePassSet(json["eventTicket"] as JObject);
+                p.Pass.FieldSets = ParsePassSet(json["eventTicket"] as JObject);
 
             if (json["boardingPass"] != null)
-                p.Pass.Set = ParsePassSet(json["boardingPass"] as JObject);
+                p.Pass.FieldSets = ParsePassSet(json["boardingPass"] as JObject);
 
             if (json["coupon"] != null)
-                p.Pass.Set = ParsePassSet(json["coupon"] as JObject);
+                p.Pass.FieldSets = ParsePassSet(json["coupon"] as JObject);
 
             if (json["generic"] != null)
-                p.Pass.Set = ParsePassSet(json["generic"] as JObject);
+                p.Pass.FieldSets = ParsePassSet(json["generic"] as JObject);
 
             if (json["storeCard"] != null)
-                p.Pass.Set = ParsePassSet(json["storeCard"] as JObject);
+                p.Pass.FieldSets = ParsePassSet(json["storeCard"] as JObject);
         }
 
         static void ParseManifest(PassKit p, ZipEntry e)

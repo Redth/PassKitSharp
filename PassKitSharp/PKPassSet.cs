@@ -76,7 +76,8 @@ namespace PassKitSharp
     {
         PKTextAlignmentLeft,
         PKTextAlignmentCenter,
-        PKTextAlignmentRight
+        PKTextAlignmentRight,
+        PKTextAlignmentNatural
     }
 
     public enum PKPassFieldNumberStyle
@@ -86,7 +87,9 @@ namespace PassKitSharp
 
     public enum PKPassFieldDateStyle
     {
-        PKDateStyleMedium
+        PKDateStyleShort,
+        PKDateStyleMedium,
+        PKDateStyleLong
     }
 
 

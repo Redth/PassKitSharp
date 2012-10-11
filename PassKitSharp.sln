@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PassKitSharp", "PassKitShar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PassKitSharp.Sample", "PassKitSharp.Sample\PassKitSharp.Sample.csproj", "{40CE8A5F-AD72-4CE5-8D21-937D20C38619}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PassKitSharp.Tests", "PassKitSharp.Tests\PassKitSharp.Tests.csproj", "{BA45D692-42B4-49BC-BCE2-01582D461E9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{40CE8A5F-AD72-4CE5-8D21-937D20C38619}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40CE8A5F-AD72-4CE5-8D21-937D20C38619}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40CE8A5F-AD72-4CE5-8D21-937D20C38619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA45D692-42B4-49BC-BCE2-01582D461E9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA45D692-42B4-49BC-BCE2-01582D461E9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA45D692-42B4-49BC-BCE2-01582D461E9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA45D692-42B4-49BC-BCE2-01582D461E9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

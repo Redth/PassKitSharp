@@ -21,13 +21,8 @@ namespace PassKitSharp
         public string LogoText { get;set; }
         public DateTime? RelevantDate { get;set; }
         public PKLocationList Locations { get; set; }
-
         public List<string> AssociatedStoreIdentifiers { get; set; }
-
         public PKBarcode Barcode { get; set; }
-
-
-        public PKPassSet Set { get; set; }
-       
+        public PKPassSet FieldSets { get; set; }       
     }
 }
