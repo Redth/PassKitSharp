@@ -13,7 +13,7 @@ namespace PassKitSharp.Sample
         {
             var pk =  PassKit.Parse(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pass.pkpass"));
 
-            Console.WriteLine(pk.ToString());
+            Console.WriteLine(pk.Pass.Barcode.Message);
         }
     }
 }
