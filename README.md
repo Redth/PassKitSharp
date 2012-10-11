@@ -11,5 +11,5 @@ Sample
 ```csharp
 var pk = PassKit.Parse("C:\\pass.pkpass");
 
-Console.WriteLine(pk.Pass.Barcode.Message);
+Console.WriteLine(pk.Barcode.Message);
 ```
