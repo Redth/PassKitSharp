@@ -13,6 +13,8 @@ namespace PassKitSharp
     {
         public static PassKit Parse(Stream pkStream)
         {
+            var discoveredHashes = new Dictionary<string, string>();
+
             var p = new PassKit();
 
             using (var zip = ZipFile.Read(pkStream))
@@ -29,11 +31,11 @@ namespace PassKitSharp
                         if (p.Manifest == null)
                             p.Manifest = new PKManifest();
 
-                        ParseManifest(p, e);
+                        ParseManifest(p, e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("pass.json", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        ParsePassJson(p, e);
+                        ParsePassJson(p, e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("background.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -41,7 +43,7 @@ namespace PassKitSharp
                             p.Background = new PKImage();
 
                         p.Background.Filename = e.FileName;
-                        p.Background.Data = ReadStream(e);
+                        p.Background.Data = ReadStream(e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("background@2x.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -49,7 +51,7 @@ namespace PassKitSharp
                             p.Background = new PKImage();
 
                         p.Background.HighResFilename = e.FileName;
-                        p.Background.HighResData = ReadStream(e);
+                        p.Background.HighResData = ReadStream(e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("logo.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -57,7 +59,7 @@ namespace PassKitSharp
                             p.Logo = new PKImage();
 
                         p.Logo.Filename = e.FileName;
-                        p.Logo.Data = ReadStream(e);
+                        p.Logo.Data = ReadStream(e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("logo@2x.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -65,7 +67,7 @@ namespace PassKitSharp
                             p.Logo = new PKImage();
 
                         p.Logo.HighResFilename = e.FileName;
-                        p.Logo.HighResData = ReadStream(e);
+                        p.Logo.HighResData = ReadStream(e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("icon.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -73,7 +75,7 @@ namespace PassKitSharp
                             p.Icon = new PKImage();
 
                         p.Icon.Filename = e.FileName;
-                        p.Icon.Data = ReadStream(e);
+                        p.Icon.Data = ReadStream(e, discoveredHashes);
                     }
                     else if (e.FileName.Equals("icon@2x.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -81,15 +83,17 @@ namespace PassKitSharp
                             p.Icon = new PKImage();
 
                         p.Icon.HighResFilename = e.FileName;
-                        p.Icon.HighResData = ReadStream(e);
+                        p.Icon.HighResData = ReadStream(e, discoveredHashes);
                     }
                 }
             }
-                       
+
+            ValidateHashes(p, discoveredHashes);
+
             return p;
         }
 
-        static void ParsePassJson(PassKit p, ZipEntry e)
+        static void ParsePassJson(PassKit p, ZipEntry e, Dictionary<string, string> discoveredHashes)
         {
             JObject json = null;
 
@@ -100,6 +104,10 @@ namespace PassKitSharp
                     e.Extract(ms);
 
                     ms.Position = 0;
+                    
+                    var sha1 = CalculateSHA1(ms.GetBuffer(), Encoding.UTF8);
+                    if (!discoveredHashes.ContainsKey(e.FileName.ToLower()))
+                        discoveredHashes.Add(e.FileName.ToLower(), sha1);
 
                     using (var sr = new StreamReader(ms))
                         json = JObject.Parse(sr.ReadToEnd());
@@ -241,7 +249,7 @@ namespace PassKitSharp
             }
         }
 
-        static void ParseManifest(PassKit p, ZipEntry e)
+        static void ParseManifest(PassKit p, ZipEntry e, Dictionary<string, string> discoveredHashes)
         {
             JObject json = null;
 
@@ -255,6 +263,10 @@ namespace PassKitSharp
                     {
                         ms.Position = 0;
 
+                        var sha1 = CalculateSHA1(ms.GetBuffer(), Encoding.UTF8);
+                        if (!discoveredHashes.ContainsKey(e.FileName.ToLower()))
+                            discoveredHashes.Add(e.FileName.ToLower(), sha1);
+                        
                         var sj = sr.ReadToEnd();
 
                         json = JObject.Parse(sj);
@@ -266,11 +278,12 @@ namespace PassKitSharp
             foreach (var prop in json.Properties())
             {
                 var val = prop.Value.ToString();
+                var name = prop.Name.ToLower();
 
-                if (!p.Manifest.ContainsKey(prop.Name))
-                    p.Manifest.Add(prop.Name, val);
+                if (!p.Manifest.ContainsKey(name))
+                    p.Manifest.Add(name, val);
                 else
-                    p.Manifest[prop.Name] = val;
+                    p.Manifest[name] = val;
             }
         }
 
@@ -348,7 +361,7 @@ namespace PassKitSharp
             }
         }
 
-        static byte[] ReadStream(ZipEntry e)
+        static byte[] ReadStream(ZipEntry e, Dictionary<string, string> discoveredHashes)
         {
             using (var input = new MemoryStream())
             {
@@ -371,9 +384,42 @@ namespace PassKitSharp
                     total_stream = stream_array;
                 }
 
+                var sha1 = CalculateSHA1(total_stream, Encoding.UTF8);
+
+                if (!discoveredHashes.ContainsKey(e.FileName.ToLower()))
+                    discoveredHashes.Add(e.FileName.ToLower(), sha1);
+
                 return total_stream;
             }
         }
-       
+
+        static string CalculateSHA1(byte[] buffer, Encoding enc)
+        {
+            var cryptoTransformSHA1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
+            return BitConverter.ToString(cryptoTransformSHA1.ComputeHash(buffer)).Replace("-", "").ToLower();
+        }
+
+        static void ValidateHashes(PassKit p, Dictionary<string, string> discoveredHashes)
+        {
+            if (p.Manifest == null)
+                throw new MissingFieldException("PassKit is missing manifest.json or was unable to correctly parse it");
+
+            foreach (var file in discoveredHashes.Keys)
+            {
+                if (file.Equals("manifest.json", StringComparison.InvariantCultureIgnoreCase))
+                    continue;
+
+                var discoveredHash = discoveredHashes[file];
+                var expectedHash = "";
+
+                if (p.Manifest.ContainsKey(file))
+                    expectedHash = p.Manifest[file];
+
+                if (!discoveredHash.Equals(expectedHash, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new FormatException("Manifest.json hash for " + file + " does not match the actual file in the PassKit!");
+                }
+            }
+        }
     }
 }
