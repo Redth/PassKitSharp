@@ -6,44 +6,14 @@ using System.Threading.Tasks;
 
 namespace PassKitSharp
 {
-    public class PKBoardingPassSet : PKPassSet
+
+    public enum PKPassType
     {
-
-    }
-
-    public class PKCouponPassSet : PKPassSet
-    {
-
-    }
-
-    public class PKEventTicketPassSet : PKPassSet
-    {
-
-    }
-
-    public class PKGenericPassSet : PKPassSet
-    {
-    }
-
-    public class PKStoreCardPassSet : PKPassSet
-    {
-
-    }
-
-    public class PKPassSet
-    {
-        public PKPassSet()
-        {
-            this.PrimaryFields = new PKPassFieldSet();
-            this.SecondaryFields = new PKPassFieldSet();
-            this.AuxiliaryFields = new PKPassFieldSet();
-            this.BackFields = new PKPassFieldSet();
-        }
-
-        public PKPassFieldSet PrimaryFields { get; set; }
-        public PKPassFieldSet SecondaryFields { get; set; }
-        public PKPassFieldSet AuxiliaryFields { get; set; }
-        public PKPassFieldSet BackFields { get; set; }
+        EventTicket,
+        BoardingPass,
+        Coupon,
+        Generic,
+        StoreCard
     }
 
     public class PKPassStringField : PKPassField

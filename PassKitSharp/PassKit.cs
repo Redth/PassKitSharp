@@ -16,11 +16,31 @@ namespace PassKitSharp
 
         public PKManifest Manifest { get; set; }
 
-        public PKPass Pass { get; set; }
-
         public Dictionary<string, PKLocalization> Localizations { get; set; }
 
+        public string PassTypeIdentifier { get; set; }
+        public int FormatVersion { get; set; }
+        public string OrganizationName { get; set; }
+        public string SerialNumber { get; set; }
+        public string TeamIdentifier { get; set; }
+        public string Description { get; set; }
+        public string ForegroundColor { get; set; }
+        public string BackgroundColor { get; set; }
+        public string LabelColor { get; set; }
+        public string LogoText { get; set; }
+        public DateTime? RelevantDate { get; set; }
+        public PKLocationList Locations { get; set; }
+        public List<string> AssociatedStoreIdentifiers { get; set; }
+        public PKBarcode Barcode { get; set; }
 
+        public PKPassType PassType { get; set; }
+
+        public PKPassFieldSet PrimaryFields { get; set; }
+        public PKPassFieldSet SecondaryFields { get; set; }
+        public PKPassFieldSet AuxiliaryFields { get; set; }
+        public PKPassFieldSet BackFields { get; set; }
+
+        
         public static PassKit Parse(string filename)
         {
             return PKParser.Parse(System.IO.File.OpenRead(filename));

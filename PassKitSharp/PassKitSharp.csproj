@@ -52,7 +52,6 @@
     <Compile Include="PKLocation.cs" />
     <Compile Include="PKManifest.cs" />
     <Compile Include="PKParser.cs" />
-    <Compile Include="PKPass.cs" />
     <Compile Include="PKPassSet.cs" />
     <Compile Include="PKStrings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

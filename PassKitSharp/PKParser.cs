@@ -33,9 +33,6 @@ namespace PassKitSharp
                     }
                     else if (e.FileName.Equals("pass.json", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        if (p.Pass == null)
-                            p.Pass = new PKPass();
-
                         ParsePassJson(p, e);
                     }
                     else if (e.FileName.Equals("background.png", StringComparison.InvariantCultureIgnoreCase))
@@ -110,9 +107,6 @@ namespace PassKitSharp
             }
             catch { }
 
-            if (p.Pass == null)
-                p.Pass = new PKPass();
-
             if (json["passTypeIdentifier"] == null)
                 throw new MissingFieldException("PassKit must include a passTypeIdentifier field!");
 
@@ -131,37 +125,37 @@ namespace PassKitSharp
             if (json["description"] == null)
                 throw new MissingFieldException("PassKit must include a description field!");
 
-            p.Pass.PassTypeIdentifier = json["passTypeIdentifier"].Value<string>();
-            p.Pass.FormatVersion = json["formatVersion"].Value<int>();
-            p.Pass.OrganizationName = json["organizationName"].Value<string>();
-            p.Pass.SerialNumber = json["serialNumber"].Value<string>();
-            p.Pass.TeamIdentifier = json["teamIdentifier"].Value<string>();
-            p.Pass.Description = json["description"].Value<string>();
+            p.PassTypeIdentifier = json["passTypeIdentifier"].Value<string>();
+            p.FormatVersion = json["formatVersion"].Value<int>();
+            p.OrganizationName = json["organizationName"].Value<string>();
+            p.SerialNumber = json["serialNumber"].Value<string>();
+            p.TeamIdentifier = json["teamIdentifier"].Value<string>();
+            p.Description = json["description"].Value<string>();
 
 
             if (json["foregroundColor"] != null)
-                p.Pass.ForegroundColor = json["foregroundColor"].Value<string>();
+                p.ForegroundColor = json["foregroundColor"].Value<string>();
 
             if (json["backgroundColor"] != null)
-                p.Pass.BackgroundColor = json["backgroundColor"].Value<string>();
+                p.BackgroundColor = json["backgroundColor"].Value<string>();
     
             if (json["labelColor"] != null)
-                p.Pass.LabelColor = json["labelColor"].Value<string>();
+                p.LabelColor = json["labelColor"].Value<string>();
 
             if (json["logoText"] != null)
-                p.Pass.LogoText = json["logoText"].Value<string>();
+                p.LogoText = json["logoText"].Value<string>();
 
             if (json["relevantDate"] != null)
-                p.Pass.RelevantDate = json["relevantDate"].Value<DateTime>();
+                p.RelevantDate = json["relevantDate"].Value<DateTime>();
 
             if (json["associatedStoreIdentifiers"] != null)
             {
-                if (p.Pass.AssociatedStoreIdentifiers == null)
-                    p.Pass.AssociatedStoreIdentifiers = new List<string>();
+                if (p.AssociatedStoreIdentifiers == null)
+                    p.AssociatedStoreIdentifiers = new List<string>();
 
                 var idarr = (JArray)json["associatedStoreIdentifiers"];
                 foreach (var ida in idarr)
-                    p.Pass.AssociatedStoreIdentifiers.Add(ida.ToString());
+                    p.AssociatedStoreIdentifiers.Add(ida.ToString());
             }
 
             if (json["locations"] != null && json["locations"] is JArray)
@@ -185,10 +179,10 @@ namespace PassKitSharp
                     if (loc["relevantText"] != null)
                         pkl.RelevantText = loc["relevantText"].Value<string>();
 
-                    if (p.Pass.Locations == null)
-                        p.Pass.Locations = new PKLocationList();
+                    if (p.Locations == null)
+                        p.Locations = new PKLocationList();
 
-                    p.Pass.Locations.Add(pkl);
+                    p.Locations.Add(pkl);
                 }
             }
 
@@ -196,8 +190,8 @@ namespace PassKitSharp
             {
                 var bc = json["barcode"] as JObject;
 
-                if (p.Pass.Barcode == null)
-                    p.Pass.Barcode = new PKBarcode();
+                if (p.Barcode == null)
+                    p.Barcode = new PKBarcode();
 
                 if (bc["message"] == null)
                     throw new MissingFieldException("PassKit Barcode must include a message field!");
@@ -209,27 +203,42 @@ namespace PassKitSharp
                     throw new MissingFieldException("PassKit Barcode must include a messageEncoding field!");
 
                 if (bc["altText"] != null)
-                    p.Pass.Barcode.AltText = bc["altText"].ToString();
+                    p.Barcode.AltText = bc["altText"].ToString();
 
-                p.Pass.Barcode.Message = bc["message"].ToString();
-                p.Pass.Barcode.MessageEncoding = bc["messageEncoding"].ToString();
-                p.Pass.Barcode.Format = (PKBarcodeFormat)Enum.Parse(typeof(PKBarcodeFormat), bc["format"].ToString());
+                p.Barcode.Message = bc["message"].ToString();
+                p.Barcode.MessageEncoding = bc["messageEncoding"].ToString();
+                p.Barcode.Format = (PKBarcodeFormat)Enum.Parse(typeof(PKBarcodeFormat), bc["format"].ToString());
             }
 
             if (json["eventTicket"] != null)
-                p.Pass.FieldSets = ParsePassSet(json["eventTicket"] as JObject);
+            {
+                p.PassType = PKPassType.EventTicket;
+                ParsePassSet(p, json["eventTicket"] as JObject);
+            }
 
             if (json["boardingPass"] != null)
-                p.Pass.FieldSets = ParsePassSet(json["boardingPass"] as JObject);
+            {
+                p.PassType = PKPassType.BoardingPass;
+                ParsePassSet(p, json["boardingPass"] as JObject);
+            }
 
             if (json["coupon"] != null)
-                p.Pass.FieldSets = ParsePassSet(json["coupon"] as JObject);
+            {
+                p.PassType = PKPassType.Coupon;
+                ParsePassSet(p, json["coupon"] as JObject);
+            }
 
             if (json["generic"] != null)
-                p.Pass.FieldSets = ParsePassSet(json["generic"] as JObject);
+            {
+                p.PassType = PKPassType.Generic;
+                ParsePassSet(p, json["generic"] as JObject);
+            }
 
             if (json["storeCard"] != null)
-                p.Pass.FieldSets = ParsePassSet(json["storeCard"] as JObject);
+            {
+                p.PassType = PKPassType.StoreCard;
+                ParsePassSet(p, json["storeCard"] as JObject);
+            }
         }
 
         static void ParseManifest(PassKit p, ZipEntry e)
@@ -265,23 +274,19 @@ namespace PassKitSharp
             }
         }
 
-        static PKPassSet ParsePassSet(JObject json)
+        static void ParsePassSet(PassKit p, JObject json)
         {
-            var ps = new PKPassSet();
-
             if (json["primaryFields"] != null && json["primaryFields"] is JArray)
-                ParsePassFieldSet(json["primaryFields"] as JArray, ps.PrimaryFields);
+                ParsePassFieldSet(json["primaryFields"] as JArray, p.PrimaryFields);
 
             if (json["secondaryFields"] != null && json["secondaryFields"] is JArray)
-                ParsePassFieldSet(json["secondaryFields"] as JArray, ps.SecondaryFields);
+                ParsePassFieldSet(json["secondaryFields"] as JArray, p.SecondaryFields);
 
             if (json["auxiliaryFields"] != null && json["auxiliaryFields"] is JArray)
-                ParsePassFieldSet(json["auxiliaryFields"] as JArray, ps.AuxiliaryFields);
+                ParsePassFieldSet(json["auxiliaryFields"] as JArray, p.AuxiliaryFields);
 
             if (json["backFields"] != null && json["backFields"] is JArray)
-                ParsePassFieldSet((JArray)json["backFields"], ps.BackFields);
-
-            return ps;
+                ParsePassFieldSet((JArray)json["backFields"], p.BackFields);
         }
 
         static void ParsePassFieldSet(JArray fieldItems, PKPassFieldSet set)
