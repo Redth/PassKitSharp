@@ -24,9 +24,9 @@ namespace PassKitSharp
         public string SerialNumber { get; set; }
         public string TeamIdentifier { get; set; }
         public string Description { get; set; }
-        public string ForegroundColor { get; set; }
-        public string BackgroundColor { get; set; }
-        public string LabelColor { get; set; }
+        public PKColor ForegroundColor { get; set; }
+        public PKColor BackgroundColor { get; set; }
+        public PKColor LabelColor { get; set; }
         public string LogoText { get; set; }
         public DateTime? RelevantDate { get; set; }
         public PKLocationList Locations { get; set; }

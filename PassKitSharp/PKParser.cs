@@ -142,13 +142,13 @@ namespace PassKitSharp
 
 
             if (json["foregroundColor"] != null)
-                p.ForegroundColor = json["foregroundColor"].Value<string>();
+                p.ForegroundColor = PKColor.Parse(json["foregroundColor"].ToString());
 
             if (json["backgroundColor"] != null)
-                p.BackgroundColor = json["backgroundColor"].Value<string>();
-    
+                p.BackgroundColor = PKColor.Parse(json["backgroundColor"].ToString());
+
             if (json["labelColor"] != null)
-                p.LabelColor = json["labelColor"].Value<string>();
+                p.LabelColor = PKColor.Parse(json["labelColor"].ToString());
 
             if (json["logoText"] != null)
                 p.LogoText = json["logoText"].Value<string>();

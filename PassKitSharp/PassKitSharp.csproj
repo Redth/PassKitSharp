@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="PassKit.cs" />
     <Compile Include="PKBarcode.cs" />
+    <Compile Include="PKColor.cs" />
     <Compile Include="PKImage.cs" />
     <Compile Include="PKLocalization.cs" />
     <Compile Include="PKLocation.cs" />
