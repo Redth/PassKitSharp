@@ -177,6 +177,9 @@ namespace PassKitSharp
             if (pk.AssociatedStoreIdentifiers != null && pk.AssociatedStoreIdentifiers.Count > 0)
                 json["associatedStoreIdentifiers"] = new JArray(pk.AssociatedStoreIdentifiers.ToArray());
 
+            if (pk.SuppressStripShine.HasValue)
+                json["suppressStripShine"] = pk.SuppressStripShine.Value;
+
             if (pk.Locations != null && pk.Locations.Count > 0)
             {
                 var jsonLocations = new JArray();

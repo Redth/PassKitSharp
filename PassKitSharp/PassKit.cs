@@ -43,6 +43,8 @@ namespace PassKitSharp
         public PKPassFieldSet AuxiliaryFields { get; set; }
         public PKPassFieldSet BackFields { get; set; }
 
+        public bool? SuppressStripShine { get; set; }
+
         
         public static PassKit Parse(string filename)
         {

@@ -198,6 +198,8 @@ namespace PassKitSharp
             p.TeamIdentifier = json["teamIdentifier"].Value<string>();
             p.Description = json["description"].Value<string>();
 
+            if (json["suppressStripShine"] != null)
+                p.SuppressStripShine = json["suppressStripShine"].Value<bool>();
 
             if (json["foregroundColor"] != null)
                 p.ForegroundColor = PKColor.Parse(json["foregroundColor"].ToString());
@@ -348,16 +350,36 @@ namespace PassKitSharp
         static void ParsePassSet(PassKit p, JObject json)
         {
             if (json["primaryFields"] != null && json["primaryFields"] is JArray)
+            {
+                if (p.PrimaryFields == null)
+                    p.PrimaryFields = new PKPassFieldSet();
+
                 ParsePassFieldSet(json["primaryFields"] as JArray, p.PrimaryFields);
+            }
 
             if (json["secondaryFields"] != null && json["secondaryFields"] is JArray)
+            {
+                if (p.SecondaryFields == null)
+                    p.SecondaryFields = new PKPassFieldSet();
+
                 ParsePassFieldSet(json["secondaryFields"] as JArray, p.SecondaryFields);
+            }
 
             if (json["auxiliaryFields"] != null && json["auxiliaryFields"] is JArray)
+            {
+                if (p.AuxiliaryFields == null)
+                    p.AuxiliaryFields = new PKPassFieldSet();
+
                 ParsePassFieldSet(json["auxiliaryFields"] as JArray, p.AuxiliaryFields);
+            }
 
             if (json["backFields"] != null && json["backFields"] is JArray)
+            {
+                if (p.BackFields == null)
+                    p.BackFields = new PKPassFieldSet();
+
                 ParsePassFieldSet((JArray)json["backFields"], p.BackFields);
+            }
         }
 
         static void ParsePassFieldSet(JArray fieldItems, PKPassFieldSet set)
@@ -377,7 +399,7 @@ namespace PassKitSharp
                 double tmp = 0;
                 DateTime tmpDate = DateTime.UtcNow;
 
-                if (DateTime.TryParse(item["value"].ToString(), out tmpDate) || item["dateStyle"] != null || item["timeStyle"] != null || item["isRelative"] != null)
+                if (item["dateStyle"] != null || item["timeStyle"] != null || item["isRelative"] != null)
                 {
                     field = new PKPassDateField();
 
