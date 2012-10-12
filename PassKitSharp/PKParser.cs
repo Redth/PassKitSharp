@@ -37,6 +37,12 @@ namespace PassKitSharp
                     {
                         ParsePassJson(p, e, discoveredHashes);
                     }
+                    else if (e.FileName.Equals("signature", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        var signatureData = ReadStream(e, discoveredHashes);
+                        if (!CheckManifest(signatureData))
+                            ;// throw new UnauthorizedAccessException("Signature is not valid");
+                    }
                     else if (e.FileName.Equals("background.png", StringComparison.InvariantCultureIgnoreCase))
                     {
                         if (p.Background == null)
@@ -399,6 +405,24 @@ namespace PassKitSharp
             return BitConverter.ToString(cryptoTransformSHA1.ComputeHash(buffer)).Replace("-", "").ToLower();
         }
 
+        static bool CheckManifest(byte[] signatureData)
+        {
+            var cont = new System.Security.Cryptography.Pkcs.ContentInfo(signatureData);
+
+            
+            var cms = new System.Security.Cryptography.Pkcs.SignedCms(cont, true);
+
+            try
+            {
+                cms.CheckSignature(true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         static void ValidateHashes(PassKit p, Dictionary<string, string> discoveredHashes)
         {
             if (p.Manifest == null)
@@ -406,7 +430,8 @@ namespace PassKitSharp
 
             foreach (var file in discoveredHashes.Keys)
             {
-                if (file.Equals("manifest.json", StringComparison.InvariantCultureIgnoreCase))
+                if (file.Equals("manifest.json", StringComparison.InvariantCultureIgnoreCase)
+                    || file.Equals("signature", StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 var discoveredHash = discoveredHashes[file];

@@ -265,9 +265,8 @@ namespace PassKitSharp
 
             var cms = new SignedCms(cont, true);
             cms.ComputeSignature(signer); // System.Security.Cryptography.CryptographicException
-
+            
             var myCmsMessage = cms.Encode();
-
 
             zipFile.AddEntry("signature", myCmsMessage);
         }
