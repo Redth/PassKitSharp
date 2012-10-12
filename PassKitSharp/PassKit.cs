@@ -13,6 +13,9 @@ namespace PassKitSharp
         public PKImage Background { get; set; }
         public PKImage Logo { get; set; }
         public PKImage Icon { get; set; }
+        public PKImage Strip { get; set; }
+        public PKImage Thumbnail { get; set; }
+        public PKImage Footer { get; set; }
 
         public PKManifest Manifest { get; set; }
 

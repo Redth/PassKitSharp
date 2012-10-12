@@ -91,6 +91,54 @@ namespace PassKitSharp
                         p.Icon.HighResFilename = e.FileName;
                         p.Icon.HighResData = ReadStream(e, discoveredHashes);
                     }
+                    else if (e.FileName.Equals("strip.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Strip == null)
+                            p.Strip = new PKImage();
+
+                        p.Strip.Filename = e.FileName;
+                        p.Strip.Data = ReadStream(e, discoveredHashes);
+                    }
+                    else if (e.FileName.Equals("strip@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Strip == null)
+                            p.Strip = new PKImage();
+
+                        p.Strip.HighResFilename = e.FileName;
+                        p.Strip.HighResData = ReadStream(e, discoveredHashes);
+                    }
+                    else if (e.FileName.Equals("thumbnail.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Thumbnail == null)
+                            p.Thumbnail = new PKImage();
+
+                        p.Thumbnail.Filename = e.FileName;
+                        p.Thumbnail.Data = ReadStream(e, discoveredHashes);
+                    }
+                    else if (e.FileName.Equals("thumbnail@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Thumbnail == null)
+                            p.Thumbnail = new PKImage();
+
+                        p.Thumbnail.HighResFilename = e.FileName;
+                        p.Thumbnail.HighResData = ReadStream(e, discoveredHashes);
+                    }
+                    else if (e.FileName.Equals("footer.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Footer == null)
+                            p.Footer = new PKImage();
+
+                        p.Footer.Filename = e.FileName;
+                        p.Footer.Data = ReadStream(e, discoveredHashes);
+                    }
+                    else if (e.FileName.Equals("footer@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        if (p.Footer == null)
+                            p.Footer = new PKImage();
+
+                        p.Footer.HighResFilename = e.FileName;
+                        p.Footer.HighResData = ReadStream(e, discoveredHashes);
+                    }
                 }
             }
 
@@ -407,7 +455,7 @@ namespace PassKitSharp
 
         static bool CheckManifest(byte[] signatureData)
         {
-            var cont = new System.Security.Cryptography.Pkcs.ContentInfo(signatureData);
+           /* var cont = new System.Security.Cryptography.Pkcs.ContentInfo(signatureData);
 
             
             var cms = new System.Security.Cryptography.Pkcs.SignedCms(cont, true);
@@ -420,7 +468,8 @@ namespace PassKitSharp
             catch (Exception ex)
             {
                 return false;
-            }
+            }*/
+			return true;
         }
 
         static void ValidateHashes(PassKit p, Dictionary<string, string> discoveredHashes)

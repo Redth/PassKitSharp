@@ -19,7 +19,11 @@ namespace PassKitSharp.Sample
             var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testpass.p12"), "password");
 
-            pk.Write(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testoutput.pkpass"), cert);
+            var outFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testoutput.pkpass");
+
+            try { File.Delete(outFile); } catch { }
+
+            pk.Write(outFile, cert);
 
             Console.WriteLine("OK");
         }

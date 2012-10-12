@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Pkcs;
+//using System.Security.Cryptography.Pkcs;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -75,6 +75,49 @@ namespace PassKitSharp
                         manifestHashes.Add("icon@2x.png", CalculateSHA1(passKit.Icon.HighResData));
                     }
                 }
+
+                if (passKit.Strip != null)
+                {
+                    if (passKit.Strip.Data != null && passKit.Strip.Data.Length > 0)
+                    {
+                        zipFile.AddEntry("strip.png", passKit.Strip.Data);
+                        manifestHashes.Add("strip.png", CalculateSHA1(passKit.Strip.Data));
+                    }
+                    if (passKit.Strip.HighResData != null && passKit.Strip.HighResData.Length > 0)
+                    {
+                        zipFile.AddEntry("strip@2x.png", passKit.Strip.HighResData);
+                        manifestHashes.Add("strip@2x.png", CalculateSHA1(passKit.Strip.HighResData));
+                    }
+                }
+
+                if (passKit.Thumbnail != null)
+                {
+                    if (passKit.Thumbnail.Data != null && passKit.Thumbnail.Data.Length > 0)
+                    {
+                        zipFile.AddEntry("thumbnail.png", passKit.Thumbnail.Data);
+                        manifestHashes.Add("thumbnail.png", CalculateSHA1(passKit.Thumbnail.Data));
+                    }
+                    if (passKit.Thumbnail.HighResData != null && passKit.Thumbnail.HighResData.Length > 0)
+                    {
+                        zipFile.AddEntry("thumbnail@2x.png", passKit.Thumbnail.HighResData);
+                        manifestHashes.Add("thumbnail@2x.png", CalculateSHA1(passKit.Thumbnail.HighResData));
+                    }
+                }
+
+                if (passKit.Footer != null)
+                {
+                    if (passKit.Footer.Data != null && passKit.Footer.Data.Length > 0)
+                    {
+                        zipFile.AddEntry("footer.png", passKit.Footer.Data);
+                        manifestHashes.Add("footer.png", CalculateSHA1(passKit.Footer.Data));
+                    }
+                    if (passKit.Footer.HighResData != null && passKit.Footer.HighResData.Length > 0)
+                    {
+                        zipFile.AddEntry("footer@2x.png", passKit.Footer.HighResData);
+                        manifestHashes.Add("footer@2x.png", CalculateSHA1(passKit.Footer.HighResData));
+                    }
+                }
+
 
                 WriteManifest(passKit, zipFile, manifestHashes, certificate);
 
@@ -258,7 +301,7 @@ namespace PassKitSharp
 
         static void SignManifest(ZipFile zipFile, byte[] manifestFileData, X509Certificate2 certificate)
         {
-            var signer = new CmsSigner(SubjectIdentifierType.SubjectKeyIdentifier, certificate);
+            /*var signer = new CmsSigner(SubjectIdentifierType.SubjectKeyIdentifier, certificate);
             signer.IncludeOption = X509IncludeOption.ExcludeRoot;
 
             ContentInfo cont = new ContentInfo(manifestFileData);
@@ -269,6 +312,7 @@ namespace PassKitSharp
             var myCmsMessage = cms.Encode();
 
             zipFile.AddEntry("signature", myCmsMessage);
+            */
         }
 
         static string CalculateSHA1(byte[] buffer)
