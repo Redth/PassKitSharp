@@ -10,7 +10,11 @@ Sample
 ------
 
 ```csharp
+//Parse an existing pkpass file
 var pk = PassKit.Parse("C:\\pass.pkpass");
 
 Console.WriteLine(pk.Barcode.Message);
+
+//Write a pkpass file out
+pk.Write("C:\\passout.pkpass", "C:\\pass-cert.p12");
 ```
