@@ -50,5 +50,20 @@ namespace PassKitSharp
         {
             return PKParser.Parse(stream);
         }
+
+        public void Write(string passKitFilename, string certificateFilename)
+        {
+            PKWriter.Write(this, passKitFilename, certificateFilename);
+        }
+
+        public void Write(string passKitFilename, byte[] certificateData)
+        {
+            PKWriter.Write(this, passKitFilename, certificateData);
+        }
+
+        public void Write(string passKitFilename, System.Security.Cryptography.X509Certificates.X509Certificate2 certificate)
+        {
+            PKWriter.Write(this, passKitFilename, certificate);
+        }
     }
 }

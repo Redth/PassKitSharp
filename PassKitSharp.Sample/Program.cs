@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,13 @@ namespace PassKitSharp.Sample
             var pk =  PassKit.Parse(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "test.pkpass"));
 
             Console.WriteLine(pk.Barcode.Message);
+
+            var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testpass.p12"), "password");
+
+            pk.Write(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "testoutput.pkpass"), cert);
+
+            Console.WriteLine("OK");
         }
     }
 }

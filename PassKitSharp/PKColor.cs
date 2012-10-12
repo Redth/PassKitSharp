@@ -20,6 +20,11 @@ namespace PassKitSharp
         public int Green { get; set; }
         public int Blue { get; set; }
 
+        public override string ToString()
+        {
+            return string.Format("rgb({0},{1},{2})", Red, Green, Blue);
+        }
+
         public static PKColor Parse(string rgbString)
         {
             var color = new PKColor();
