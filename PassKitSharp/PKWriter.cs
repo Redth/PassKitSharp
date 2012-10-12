@@ -10,6 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Ionic.Zip;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Cms;
+using Org.BouncyCastle.Security;
+
 
 namespace PassKitSharp
 {
@@ -301,19 +305,49 @@ namespace PassKitSharp
 
         static void SignManifest(ZipFile zipFile, byte[] manifestFileData, X509Certificate2 certificate)
         {
-            /*var signer = new CmsSigner(SubjectIdentifierType.SubjectKeyIdentifier, certificate);
+            
+#if MONOTOUCH || MONODROID || MONOFORANDROID || MONOANDROID
+            var cert = DotNetUtilities.FromX509Certificate(certificate);
+
+            var privateKey = DotNetUtilities.GetKeyPair(certificate.PrivateKey).Private;
+            var generator = new CmsSignedDataGenerator();
+
+            generator.AddSigner(privateKey, cert, CmsSignedDataGenerator.DigestSha1);
+
+            var certList = new System.Collections.ArrayList();
+            var a1Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleWWDRCA.cer"));
+            var a2Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleIncRootCertificate.cer"));
+
+            certList.Add(cert);
+            //certList.Add(DotNetUtilities.FromX509Certificate(a1Cert));
+            //certList.Add(DotNetUtilities.FromX509Certificate(a2Cert));
+            
+            Org.BouncyCastle.X509.Store.X509CollectionStoreParameters PP = new Org.BouncyCastle.X509.Store.X509CollectionStoreParameters(certList);
+            Org.BouncyCastle.X509.Store.IX509Store st1 = Org.BouncyCastle.X509.Store.X509StoreFactory.Create("CERTIFICATE/COLLECTION", PP);
+            
+            generator.AddCertificates(st1);
+
+            var content = new CmsProcessableByteArray(manifestFileData);
+            var signedData = generator.Generate(content, false);
+
+            var data = signedData.GetEncoded();
+
+            zipFile.AddEntry("signature", data);   
+#else
+            var signer = new System.Security.Cryptography.Pkcs.CmsSigner(
+                System.Security.Cryptography.Pkcs.SubjectIdentifierType.SubjectKeyIdentifier, certificate);
             signer.IncludeOption = X509IncludeOption.ExcludeRoot;
 
-            ContentInfo cont = new ContentInfo(manifestFileData);
+            var cont = new System.Security.Cryptography.Pkcs.ContentInfo(manifestFileData);
 
-            var cms = new SignedCms(cont, true);
+            var cms = new System.Security.Cryptography.Pkcs.SignedCms(cont, true);
             cms.ComputeSignature(signer); // System.Security.Cryptography.CryptographicException
-            
+
             var myCmsMessage = cms.Encode();
 
             zipFile.AddEntry("signature", myCmsMessage);
-            */
-        }
+#endif
+        }      
 
         static string CalculateSHA1(byte[] buffer)
         {

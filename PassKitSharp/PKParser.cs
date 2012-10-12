@@ -6,6 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Ionic.Zip;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Cms;
+using Org.BouncyCastle.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PassKitSharp
 {
@@ -41,7 +45,7 @@ namespace PassKitSharp
                     {
                         var signatureData = ReadStream(e, discoveredHashes);
                         if (!CheckManifest(signatureData))
-                            ;// throw new UnauthorizedAccessException("Signature is not valid");
+                            throw new UnauthorizedAccessException("Signature is not valid");
                     }
                     else if (e.FileName.Equals("background.png", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -455,23 +459,40 @@ namespace PassKitSharp
 
         static bool CheckManifest(byte[] signatureData)
         {
-           /* var cont = new System.Security.Cryptography.Pkcs.ContentInfo(signatureData);
+#if MONOTOUCH || MONODROID || MONOFORANDROID || MONOANDROID
+            //var certList = new System.Collections.ArrayList();
+            //var a1Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleWWDRCA.cer"));
+            //var a2Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleIncRootCertificate.cer"));
 
+            //certList.Add(DotNetUtilities.FromX509Certificate(a1Cert));
+            //certList.Add(DotNetUtilities.FromX509Certificate(a2Cert));
             
-            var cms = new System.Security.Cryptography.Pkcs.SignedCms(cont, true);
+            //Org.BouncyCastle.X509.Store.X509CollectionStoreParameters PP = new Org.BouncyCastle.X509.Store.X509CollectionStoreParameters(certList);
+            //Org.BouncyCastle.X509.Store.IX509Store st1 = Org.BouncyCastle.X509.Store.X509StoreFactory.Create("CERTIFICATE/COLLECTION", PP);
 
+            var parser = new CmsSignedDataParser(signatureData);
+            
+            var signerInfos = parser.GetSignerInfos();
+            
+            foreach (SignerInformation si in signerInfos.GetSigners())
+            {
+                Console.WriteLine(si.ToString());
+            }
+            
+            return true;
+#else
             try
             {
-                cms.CheckSignature(true);
+                var signed = new System.Security.Cryptography.Pkcs.SignedCms();
+                signed.Decode(signatureData);
+                signed.CheckHash();
+
                 return true;
             }
-            catch (Exception ex)
-            {
-                return false;
-            }*/
-			return true;
+            catch { return false; }
+#endif
         }
-
+        
         static void ValidateHashes(PassKit p, Dictionary<string, string> discoveredHashes)
         {
             if (p.Manifest == null)
