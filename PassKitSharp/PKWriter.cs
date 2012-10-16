@@ -308,8 +308,6 @@ namespace PassKitSharp
 
         static void SignManifest(ZipFile zipFile, byte[] manifestFileData, X509Certificate2 certificate)
         {
-            
-#if MONOTOUCH || MONODROID || MONOFORANDROID || MONOANDROID
             var cert = DotNetUtilities.FromX509Certificate(certificate);
 
             var privateKey = DotNetUtilities.GetKeyPair(certificate.PrivateKey).Private;
@@ -318,8 +316,8 @@ namespace PassKitSharp
             generator.AddSigner(privateKey, cert, CmsSignedDataGenerator.DigestSha1);
 
             var certList = new System.Collections.ArrayList();
-            var a1Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleWWDRCA.cer"));
-            var a2Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleIncRootCertificate.cer"));
+            //var a1Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleWWDRCA.cer"));
+            //var a2Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleIncRootCertificate.cer"));
 
             certList.Add(cert);
             //certList.Add(DotNetUtilities.FromX509Certificate(a1Cert));
@@ -336,20 +334,6 @@ namespace PassKitSharp
             var data = signedData.GetEncoded();
 
             zipFile.AddEntry("signature", data);   
-#else
-            var signer = new System.Security.Cryptography.Pkcs.CmsSigner(
-                System.Security.Cryptography.Pkcs.SubjectIdentifierType.SubjectKeyIdentifier, certificate);
-            signer.IncludeOption = X509IncludeOption.ExcludeRoot;
-
-            var cont = new System.Security.Cryptography.Pkcs.ContentInfo(manifestFileData);
-
-            var cms = new System.Security.Cryptography.Pkcs.SignedCms(cont, true);
-            cms.ComputeSignature(signer); // System.Security.Cryptography.CryptographicException
-
-            var myCmsMessage = cms.Encode();
-
-            zipFile.AddEntry("signature", myCmsMessage);
-#endif
         }      
 
         static string CalculateSHA1(byte[] buffer)

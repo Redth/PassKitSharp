@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Ionic.Zip;
 using Newtonsoft.Json.Linq;
@@ -11,11 +12,12 @@ using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Security;
 using System.Security.Cryptography.X509Certificates;
 
+
 namespace PassKitSharp
 {
     public class PKParser
     {
-        public static PassKit Parse(Stream pkStream)
+        public static PassKit Parse(Stream pkStream, bool loadHighResImages = true)
         {
             var discoveredHashes = new Dictionary<string, string>();
 
@@ -29,6 +31,30 @@ namespace PassKitSharp
                     {
                         continue;
                     }
+
+                    PKLocalization pkLocalization = null;
+
+                    /*var localeRx = new Regex(@"/{0,1}(?<locale>[a-zA-Z\-]{2,})\.lproj", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+                    var localeMatch = localeRx.Match(e.FileName);
+
+                    if (localeMatch != null && localeMatch.Success && localeMatch.Groups != null && localeMatch.Groups["locale"] != null)
+                    {
+                        var localeName = localeMatch.Groups["locale"].Value.ToLower().Trim();
+
+                        if (p.Localizations == null)
+                            p.Localizations = new Dictionary<string, PKLocalization>();
+
+                        if (!p.Localizations.ContainsKey(localeName))
+                        {
+                            pkLocalization = new PKLocalization();
+                            p.Localizations.Add(localeName, pkLocalization);
+                        }
+                        else
+                            pkLocalization = p.Localizations[localeName];
+                    }
+                     * */
+                    
 
                     if (e.FileName.Equals("manifest.json", StringComparison.InvariantCultureIgnoreCase))
                     {
@@ -49,13 +75,25 @@ namespace PassKitSharp
                     }
                     else if (e.FileName.Equals("background.png", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        if (p.Background == null)
-                            p.Background = new PKImage();
+                        if (pkLocalization == null)
+                        {
+                            if (p.Background == null)
+                                p.Background = new PKImage();
 
-                        p.Background.Filename = e.FileName;
-                        p.Background.Data = ReadStream(e, discoveredHashes);
+                            p.Background.Filename = e.FileName;
+                            p.Background.Data = ReadStream(e, discoveredHashes);
+                        }
+                        else
+                        {
+                            if (pkLocalization.Background == null)
+                                pkLocalization.Background = new PKImage();
+
+                            pkLocalization.Background.Filename = e.FileName;
+                            pkLocalization.Background.Data = ReadStream(e, discoveredHashes);
+
+                        }
                     }
-                    else if (e.FileName.Equals("background@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("background@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Background == null)
                             p.Background = new PKImage();
@@ -71,7 +109,7 @@ namespace PassKitSharp
                         p.Logo.Filename = e.FileName;
                         p.Logo.Data = ReadStream(e, discoveredHashes);
                     }
-                    else if (e.FileName.Equals("logo@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("logo@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Logo == null)
                             p.Logo = new PKImage();
@@ -87,7 +125,7 @@ namespace PassKitSharp
                         p.Icon.Filename = e.FileName;
                         p.Icon.Data = ReadStream(e, discoveredHashes);
                     }
-                    else if (e.FileName.Equals("icon@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("icon@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Icon == null)
                             p.Icon = new PKImage();
@@ -103,7 +141,7 @@ namespace PassKitSharp
                         p.Strip.Filename = e.FileName;
                         p.Strip.Data = ReadStream(e, discoveredHashes);
                     }
-                    else if (e.FileName.Equals("strip@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("strip@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Strip == null)
                             p.Strip = new PKImage();
@@ -119,7 +157,7 @@ namespace PassKitSharp
                         p.Thumbnail.Filename = e.FileName;
                         p.Thumbnail.Data = ReadStream(e, discoveredHashes);
                     }
-                    else if (e.FileName.Equals("thumbnail@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("thumbnail@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Thumbnail == null)
                             p.Thumbnail = new PKImage();
@@ -135,7 +173,7 @@ namespace PassKitSharp
                         p.Footer.Filename = e.FileName;
                         p.Footer.Data = ReadStream(e, discoveredHashes);
                     }
-                    else if (e.FileName.Equals("footer@2x.png", StringComparison.InvariantCultureIgnoreCase))
+                    else if (e.FileName.Equals("footer@2x.png", StringComparison.InvariantCultureIgnoreCase) && loadHighResImages)
                     {
                         if (p.Footer == null)
                             p.Footer = new PKImage();
@@ -150,6 +188,7 @@ namespace PassKitSharp
 
             return p;
         }
+
 
         static void ParsePassJson(PassKit p, ZipEntry e, Dictionary<string, string> discoveredHashes)
         {
@@ -481,7 +520,6 @@ namespace PassKitSharp
 
         static bool CheckManifest(byte[] signatureData)
         {
-#if MONOTOUCH || MONODROID || MONOFORANDROID || MONOANDROID
             //var certList = new System.Collections.ArrayList();
             //var a1Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleWWDRCA.cer"));
             //var a2Cert = new X509Certificate2(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppleIncRootCertificate.cer"));
@@ -492,17 +530,18 @@ namespace PassKitSharp
             //Org.BouncyCastle.X509.Store.X509CollectionStoreParameters PP = new Org.BouncyCastle.X509.Store.X509CollectionStoreParameters(certList);
             //Org.BouncyCastle.X509.Store.IX509Store st1 = Org.BouncyCastle.X509.Store.X509StoreFactory.Create("CERTIFICATE/COLLECTION", PP);
 
-            var parser = new CmsSignedDataParser(signatureData);
+            //var parser = new CmsSignedDataParser(signatureData);
             
-            var signerInfos = parser.GetSignerInfos();
+            //var signerInfos = parser.GetSignerInfos();
             
-            foreach (SignerInformation si in signerInfos.GetSigners())
-            {
-                Console.WriteLine(si.ToString());
-            }
-            
+            //foreach (SignerInformation si in signerInfos.GetSigners())
+            //{
+            //    Console.WriteLine(si.ToString());
+           	//}
+           
             return true;
-#else
+
+            /* MSCLR Verification code
             try
             {
                 var signed = new System.Security.Cryptography.Pkcs.SignedCms();
@@ -511,8 +550,7 @@ namespace PassKitSharp
 
                 return true;
             }
-            catch { return false; }
-#endif
+            catch { return false; }*/
         }
         
         static void ValidateHashes(PassKit p, Dictionary<string, string> discoveredHashes)

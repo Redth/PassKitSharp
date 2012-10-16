@@ -46,14 +46,14 @@ namespace PassKitSharp
         public bool? SuppressStripShine { get; set; }
 
         
-        public static PassKit Parse(string filename)
+        public static PassKit Parse(string filename, bool loadHighResImages = true)
         {
-            return PKParser.Parse(System.IO.File.OpenRead(filename));
+            return PKParser.Parse(System.IO.File.OpenRead(filename), loadHighResImages);
         }
 
-        public static PassKit Parse(System.IO.Stream stream)
+        public static PassKit Parse(System.IO.Stream stream, bool loadHighResImages = true)
         {
-            return PKParser.Parse(stream);
+            return PKParser.Parse(stream, loadHighResImages);
         }
 
         public void Write(string passKitFilename, string certificateFilename)
