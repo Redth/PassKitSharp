@@ -180,6 +180,12 @@ namespace PassKitSharp
             if (pk.SuppressStripShine.HasValue)
                 json["suppressStripShine"] = pk.SuppressStripShine.Value;
 
+            if (!string.IsNullOrEmpty(pk.WebServiceURL))
+                json["webServiceURL"] = pk.WebServiceURL;
+
+            if (!string.IsNullOrEmpty(pk.AuthenticationToken))
+                json["authenticationToken"] = pk.AuthenticationToken;
+
             if (pk.Locations != null && pk.Locations.Count > 0)
             {
                 var jsonLocations = new JArray();

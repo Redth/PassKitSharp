@@ -237,6 +237,13 @@ namespace PassKitSharp
             p.TeamIdentifier = json["teamIdentifier"].Value<string>();
             p.Description = json["description"].Value<string>();
 
+
+            if (json["webServiceURL"] != null)
+                p.WebServiceURL = json["webServiceURL"].ToString();
+
+            if (json["authenticationToken"] != null)
+                p.AuthenticationToken = json["authenticationToken"].ToString();
+
             if (json["suppressStripShine"] != null)
                 p.SuppressStripShine = json["suppressStripShine"].Value<bool>();
 
